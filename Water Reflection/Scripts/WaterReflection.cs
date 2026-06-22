@@ -6,7 +6,9 @@ public class WaterReflection : MonoBehaviour
     // Sprite that will receive the water shader.
     public SpriteRenderer spriteRenderer;
     // Camera used to capture the reflection scene.
-    public Camera camera;
+    public Camera reflectionCamera;
+    // Camera used to capture the objects on Water Overlay layer to overlay reflection scene.
+    public Camera waterOverlayCamera;
     // Resolution of the reflection's texture.
     public int pixelsPerUnit = 32;
     // Water's color.
@@ -32,6 +34,7 @@ public class WaterReflection : MonoBehaviour
     public Vector2 waveInversedScale = Vector2.one;
 
     private RenderTexture renderTexture;
+    private RenderTexture overlayRenderTexture;
     private Material waterMaterial;
 
     public void Awake()
@@ -42,19 +45,19 @@ public class WaterReflection : MonoBehaviour
 
     public void UpdateCamera()
     {
-        if (spriteRenderer != null && camera != null && waterShader != null)
+        if (spriteRenderer != null && reflectionCamera != null && waterShader != null)
         {
             renderTexture = new RenderTexture((int)spriteRenderer.bounds.size.x * pixelsPerUnit, (int)spriteRenderer.bounds.size.y * pixelsPerUnit, 1);
             renderTexture.name = "Render Texture";
 
             float cameraHeight = spriteRenderer.bounds.size.y * verticalSqueezeRatio;
-            camera.aspect = spriteRenderer.bounds.size.x / cameraHeight;
-            camera.orthographicSize = verticalSqueezeRatio * spriteRenderer.bounds.size.y / 2;
-            camera.targetTexture = renderTexture;
-            Vector3 cameraPosition = camera.transform.position;
+            reflectionCamera.aspect = spriteRenderer.bounds.size.x / cameraHeight;
+            reflectionCamera.orthographicSize = verticalSqueezeRatio * spriteRenderer.bounds.size.y / 2;
+            reflectionCamera.targetTexture = renderTexture;
+            Vector3 cameraPosition = reflectionCamera.transform.position;
             cameraPosition.x = spriteRenderer.transform.position.x;
             cameraPosition.y = verticalCameraOffset + spriteRenderer.transform.position.y + spriteRenderer.bounds.size.y / 2 + cameraHeight / 2;
-            camera.transform.position = cameraPosition;
+            reflectionCamera.transform.position = cameraPosition;
 
             waterMaterial = new Material(waterShader);
             waterMaterial.SetTexture("_WaterTex", waterTexture);
@@ -68,6 +71,25 @@ public class WaterReflection : MonoBehaviour
             waterMaterial.SetVector("_PatternSizeReduction", waveInversedScale);
 
             spriteRenderer.material = waterMaterial;
+        }
+
+        // Overlay Camera
+        if (spriteRenderer != null && waterOverlayCamera != null && waterShader != null)
+        {
+            overlayRenderTexture = new RenderTexture((int)spriteRenderer.bounds.size.x * pixelsPerUnit, (int)spriteRenderer.bounds.size.y * pixelsPerUnit, 1);
+            overlayRenderTexture.name = "Overlay Render Texture";
+
+            float cameraHeight = spriteRenderer.bounds.size.y * verticalSqueezeRatio;
+            waterOverlayCamera.aspect = spriteRenderer.bounds.size.x / cameraHeight;
+            waterOverlayCamera.orthographicSize = verticalSqueezeRatio * spriteRenderer.bounds.size.y / 2;
+            waterOverlayCamera.targetTexture = overlayRenderTexture;
+            Vector3 cameraPosition = waterOverlayCamera.transform.position;
+            cameraPosition.x = spriteRenderer.transform.position.x;
+            //cameraPosition.y = verticalCameraOffset + spriteRenderer.transform.position.y + spriteRenderer.bounds.size.y / 2 + cameraHeight / 2;
+            cameraPosition.y = spriteRenderer.transform.position.y;
+            waterOverlayCamera.transform.position = cameraPosition;
+
+            waterMaterial.SetTexture("_OverlayRenderTex", overlayRenderTexture);
         }
     }
 }

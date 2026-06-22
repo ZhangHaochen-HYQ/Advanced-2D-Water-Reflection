@@ -6,9 +6,10 @@ public class WaterReflectionEditor : Editor
 {
     private WaterReflection waterReflection;
     private SerializedProperty spriteRenderer;
-    private SerializedProperty camera;
+    private SerializedProperty reflectionCamera;
     private SerializedProperty waterShader;
     private SerializedProperty waterTexture;
+    private SerializedProperty waterOverlayCamera;
 
     private void OnEnable()
     {
@@ -17,7 +18,8 @@ public class WaterReflectionEditor : Editor
         waterReflection.UpdateCamera();
 
         spriteRenderer = serializedObject.FindProperty("spriteRenderer");
-        camera = serializedObject.FindProperty("camera");
+        reflectionCamera = serializedObject.FindProperty("reflectionCamera");
+        waterOverlayCamera = serializedObject.FindProperty("waterOverlayCamera");
         waterShader = serializedObject.FindProperty("waterShader");
         waterTexture = serializedObject.FindProperty("waterTexture");
     }
@@ -28,8 +30,9 @@ public class WaterReflectionEditor : Editor
         EditorGUI.BeginChangeCheck();
 
         GUILayout.Space(10);
-        EditorGUILayout.PropertyField(camera, new GUIContent("Camera", "Camera used to capture the reflection scene."));
-        if (camera.objectReferenceValue == null)
+        EditorGUILayout.PropertyField(reflectionCamera, new GUIContent("Reflection Camera", "Camera used to capture the reflection scene."));
+        EditorGUILayout.PropertyField(waterOverlayCamera, new GUIContent("Water Overlay Camera", "Camera used to capture the objects on Water Overlay layer to overlay reflection scene."));
+        if (reflectionCamera.objectReferenceValue == null)
         {
             EditorGUILayout.HelpBox("You must assign the camera.", MessageType.Error);
         }
